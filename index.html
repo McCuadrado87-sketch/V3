@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Automotive Specialist Services LLC — V3 Final</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f4f6;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+header{position:sticky;top:0;z-index:20;background:#111827;color:white;padding:14px;box-shadow:0 2px 10px #0003}
+.brand{font-weight:800;font-size:18px}.sub{font-size:12px;color:#d1d5db}
+.wrap{max-width:900px;margin:auto;padding:12px 10px 90px}
+.screen{display:none}.screen.active{display:block}
+.card{background:white;border:1px solid #d1d5db;border-radius:14px;padding:14px;margin:10px 0}
+h1,h2,h3{margin:4px 0 10px}h1{font-size:24px}h2{font-size:20px}h3{font-size:16px}
+label{display:block;font-size:13px;font-weight:700;margin:9px 0 5px}
+input,select,textarea{width:100%;border:1px solid #bfc5cc;border-radius:9px;padding:11px;font:inherit;background:white;color:#111827}
+textarea{min-height:80px;resize:vertical}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+button{border:0;border-radius:10px;padding:12px 14px;font-weight:800;font-size:14px}
+.primary{background:#1d4ed8;color:white}.secondary{background:#e5e7eb;color:#111827}
+.danger{background:#fee2e2;color:#991b1b}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.actions button{flex:1;min-width:120px}
+.nav{display:flex;gap:8px;position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #d1d5db;padding:9px;z-index:15}
+.nav button{flex:1}
+.stepbar{display:flex;overflow:auto;gap:5px;margin:8px 0}
+.step{min-width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#e5e7eb;font-size:11px;font-weight:800}
+.step.current{background:#1d4ed8;color:white}.step.done{background:#bbf7d0;color:#166534}
+.statusrow{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px}
+.statusrow button{padding:10px 3px;background:#f3f4f6;border:2px solid transparent}
+.statusrow .pass{background:#dcfce7;border-color:#15803d;color:#166534}
+.statusrow .attn{background:#fef3c7;border-color:#ca8a04;color:#854d0e}
+.statusrow .fail{background:#fee2e2;border-color:#dc2626;color:#991b1b}
+.statusrow .na{background:#e5e7eb;border-color:#6b7280}
+.item{border:1px solid #d1d5db;border-radius:12px;padding:11px;margin:9px 0}
+.itemhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.small{font-size:12px;color:#6b7280}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.photo{position:relative}.photo img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid #d1d5db}
+.photo button{position:absolute;right:3px;top:3px;padding:3px 7px;border-radius:50%;background:#000b;color:white}
+.homegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.homebtn{min-height:105px;text-align:left;background:white;border:1px solid #d1d5db}
+.homebtn strong{display:block;font-size:17px;margin-bottom:5px}.homebtn span{font-size:12px;color:#6b7280}
+.report{background:white;padding:22px;max-width:900px;margin:auto}
+.report table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}
+.report th,.report td{border:1px solid #d1d5db;padding:6px;text-align:left;vertical-align:top}
+.report th{background:#f3f4f6}.rpass{background:#dcfce7}.rattn{background:#fef3c7}.rfail{background:#fee2e2}
+.rphotos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rphotos img{width:100%;max-height:190px;object-fit:cover}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.homegrid{grid-template-columns:1fr 1fr}}
+@media print{body{background:white}.no-print,header,.nav{display:none!important}.wrap{padding:0}.report{display:block!important;max-width:none}.report-page{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<header class="no-print">
+<div class="brand">Automotive Specialist Services LLC</div>
+<div class="sub">Professional Vehicle Inspection System — V3 Final</div>
+</header>
+
+<div class="wrap">
+
+<section id="home" class="screen active">
+<div class="card">
+<h1>Inspection Dashboard</h1>
+<p class="small">Complete field inspection workflow. Your inspection automatically saves on this device.</p>
+</div>
+<div class="homegrid">
+<button class="homebtn" onclick="newInspection()"><strong>➕ New Inspection</strong><span>Start a complete inspection</span></button>
+<button class="homebtn" onclick="saved()"><strong>💾 Saved Inspections</strong><span>Resume field work</span></button>
+<button class="homebtn" onclick="reports()"><strong>📄 Reports</strong><span>View completed reports</span></button>
+<button class="homebtn" onclick="settings()"><strong>⚙️ Settings</strong><span>Business information</span></button>
+</div>
+</section>
+
+<section id="form" class="screen">
+<div id="steps" class="stepbar"></div>
+<div id="content"></div>
+<div class="nav no-print">
+<button class="secondary" onclick="back()">← Back</button>
+<button class="secondary" onclick="save();toast('Saved')">💾 Save</button>
+<button id="next" class="primary" onclick="next()">Next →</button>
+</div>
+</section>
+
+<section id="list" class="screen">
+<div class="card">
+<h2 id="listTitle"></h2>
+<div id="listBody"></div>
+</div>
+<button class="secondary" onclick="home()">← Dashboard</button>
+</section>
+
+<section id="settings" class="screen">
+<div class="card">
+<h2>Business Settings</h2>
+<label>Business Name<input id="sName"></label>
+<label>Default Inspector<input id="sInspector"></label>
+<label>Report Disclaimer<textarea id="sDisclaimer"></textarea></label>
+<div class="actions">
+<button class="primary" onclick="saveSettings()">Save Settings</button>
+<button class="secondary" onclick="home()">Back</button>
+</div>
+</div>
+</section>
+
+<section id="reportScreen" class="screen">
+<div class="actions no-print">
+<button class="secondary" onclick="home()">← Dashboard</button>
+<button class="primary" onclick="window.print()">🖨️ Print / Save PDF</button>
+</div>
+<div id="report" class="report"></div>
+</section>
+
+</div>
+
+<input id="camera" hidden type="file" accept="image/*" capture="environment">
+
+<script>
+const STEPS=[
+'Customer & Vehicle Information',
+'Vehicle Verification',
+'OBD-II Scan',
+'Exterior Condition',
+'Test Drive',
+'A/C & HVAC',
+'Battery Test',
+'Electrical',
+'Engine / Under-Hood',
+'Left Front',
+'Left Rear',
+'Right Front',
+'Right Rear',
+'Transmission / Drivetrain',
+'Undercarriage',
+'Findings Summary',
+'Photos & Evidence',
+'Professional Report'
+];
+
+const ELECTRICAL=[
+'Headlights','Turn / Hazard Lights','Brake / Reverse Lights','License Plate Lights',
+'Wipers / Washers','Horn','Power Windows','Power Locks','Power Mirrors','Interior Lights',
+'Gauges / Cluster','Infotainment','Backup Camera','Parking Sensors','Power Seats','Sunroof','12V / USB'
+];
+
+const ENGINE=[
+'Engine Oil','Coolant','Brake Fluid','Power Steering Fluid','Transmission Fluid',
+'Belts','Hoses','Battery Area','Engine Mounts','Visible Leaks','Engine Operation',
+'Emissions / Manufacturer Labels','A/C / Transmission Labels'
+];
+
+const CORNER=[
+'Exterior / Body','Wheel / Rim','Brake','Suspension / Steering'
+];
+
+const DEFAULT_SETTINGS={
+id:'business',
+name:'Automotive Specialist Services LLC',
+inspector:'',
+disclaimer:'This inspection is a visual and functional evaluation based on conditions observable at the time of inspection. It is not a guarantee of future performance or a substitute for specialized diagnostic, structural, or manufacturer-authorized testing. Test-drive and inspection limitations are documented when applicable.'
+};
+
+let state=null;
+let step=0;
+let db=null;
+let photoKey='';
+let settingsData={...DEFAULT_SETTINGS};
+
+function blank(){
+return{
+id:crypto.randomUUID(),
+updated:new Date().toISOString(),
+completed:false,
+customer:{},
+vehicle:{},
+price:'',
+verification:{},
+obd:{scan:'Yes',codes:'',warning:'',notes:'',pdfName:''},
+test:{},
+hvac:{},
+battery:{},
+electrical:{},
+engine:{},
+corners:{LF:{},LR:{},RF:{},RR:{}},
+drivetrain:{},
+undercarriage:{},
+generalNotes:'',
+limitations:'',
+photos:{}
+};
+}
+
+function openDB(){
+return new Promise((resolve,reject)=>{
+const req=indexedDB.open('ASS_V3_FINAL',1);
+req.onupgradeneeded=()=>{
+const d=req.result;
+if(!d.objectStoreNames.contains('inspections'))d.createObjectStore('inspections',{keyPath:'id'});
+if(!d.objectStoreNames.contains('settings'))d.createObjectStore('settings',{keyPath:'id'});
+};
+req.onsuccess=()=>{db=req.result;loadSettings().then(resolve)};
+req.onerror=()=>reject(req.error);
+});
+}
+
+function store(name,mode='readonly'){
+return db.transaction(name,mode).objectStore(name);
+}
+
+function put(obj,name='inspections'){
+return new Promise((resolve,reject)=>{
+const r=store(name,'readwrite').put(obj);
+r.onsuccess=resolve;r.onerror=()=>reject(r.error);
+});
+}
+
+function all(name='inspections'){
+return new Promise((resolve,reject)=>{
+const r=store(name).getAll();
+r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);
+});
+}
+
+function get(id){
+return new Promise((resolve,reject)=>{
+const r=store('inspections').get(id);
+r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);
+});
+}
+
+function del(id){
+return new Promise((resolve,reject)=>{
+const r=store('inspections','readwrite').delete(id);
+r.onsuccess=resolve;r.onerror=()=>reject(r.error);
+});
+}
+
+async function loadSettings(){
+const a=await all('settings');
+if(a[0])settingsData={...DEFAULT_SETTINGS,...a[0]};
+}
+
+function show(id){
+document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+
+function home(){
+if(state)save();
+show('home');
+}
+
+function newInspection(){
+state=blank();
+state.customer.date=new Date().toISOString().slice(0,16);
+state.customer.inspector=settingsData.inspector;
+step=0;
+show('form');
+render();
+}
+
+async function saved(){
+show('list');
+document.getElementById('listTitle').textContent='Saved Inspections';
+renderList(await all());
+}
+
+async function reports(){
+show('list');
+document.getElementById('listTitle').textContent='Completed Reports';
+renderList((await all()).filter(x=>x.completed));
+}
+
+function renderList(a){
+a.sort((x,y)=>y.updated.localeCompare(x.updated));
+document.getElementById('listBody').innerHTML=a.length?a.map(x=>{
+const v=x.vehicle||{};
+return `<div class="item">
+<b>${esc((x.customer?.name||'Unnamed')+' — '+(v.year||'')+' '+(v.make||'')+' '+(v.model||''))}</b>
+<div class="small">${new Date(x.updated).toLocaleString()}</div>
+<div class="actions">
+<button class="primary" onclick="loadInspection('${x.id}')">Open</button>
+<button class="danger" onclick="removeInspection('${x.id}')">Delete</button>
+</div>
+</div>`;
+}).join(''):'<p class="small">No inspections saved.</p>';
+}
+
+async function loadInspection(id){
+state=await get(id);
+step=0;
+show('form');
+render();
+}
+
+async function removeInspection(id){
+if(confirm('Delete this inspection?')){
+await del(id);
+saved();
+}
+}
+
+function save(){
+if(!state)return;
+state.updated=new Date().toISOString();
+put(state).catch(()=>{});
+}
+
+function getPath(obj,path){
+return path.split('.').reduce((a,k)=>a==null?undefined:a[k],obj);
+}
+
+function setPath(obj,path,value){
+const keys=path.split('.');
+let x=obj;
+for(let i=0;i<keys.length-1;i++){
+if(!x[keys[i]]||typeof x[keys[i]]!=='object')x[keys[i]]={};
+x=x[keys[i]];
+}
+x[keys[keys.length-1]]=value;
+}
+
+function slug(s){
+return s.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+}
+
+function statusItem(label,path){
+const v=getPath(state,path)||{};
+return `<div class="item" data-item="${path}">
+<div class="itemhead"><b>${esc(label)}</b></div>
+<div class="statusrow">
+<button class="${v.status==='PASS'?'pass':''}" onclick="setStatus('${path}','PASS')">PASS</button>
+<button class="${v.status==='ATTENTION'?'attn':''}" onclick="setStatus('${path}','ATTENTION')">ATTENTION</button>
+<button class="${v.status==='FAIL'?'fail':''}" onclick="setStatus('${path}','FAIL')">FAIL</button>
+<button class="${v.status==='N/A'?'na':''}" onclick="setStatus('${path}','N/A')">N/A</button>
+</div>
+<textarea data-path="${path}.note" placeholder="Notes"></textarea>
+</div>`;
+}
+
+function photoBox(label,key){
+return `<div class="item">
+<b>${esc(label)}</b>
+<div class="actions">
+<button class="primary" onclick="takePhoto('${key}')">📷 Take / Add Photo</button>
+</div>
+<div class="photo-grid" data-grid="${key}"></div>
+</div>`;
+}
+
+function render(){
+document.getElementById('steps').innerHTML=STEPS.map((x,i)=>
+`<div class="step ${i===step?'current':''} ${i<step?'done':''}">${i+1}</div>`
+).join('');
+document.getElementById('content').innerHTML=page(step);
+document.getElementById('next').textContent=step===STEPS.length-1?'Finish':'Next →';
+hydrate();
+}
+
+function page(i){
+
+if(i===0)return `
+<div class="card">
+<h2>1. Customer & Vehicle Information</h2>
+<div class="grid">
+<label>Customer Name<input data-path="customer.name"></label>
+<label>Inspection Price<input data-path="price" type="number" step="0.01"></label>
+<label>Inspection Type<select data-path="customer.type">
+<option>Pre-Purchase</option><option>Post-Purchase</option><option>Warranty</option><option>Dealer</option><option>Other</option>
+</select></label>
+<label>Date / Time<input data-path="customer.date" type="datetime-local"></label>
+<label>Inspector<input data-path="customer.inspector"></label>
+<label>Year<input data-path="vehicle.year"></label>
+<label>Make<input data-path="vehicle.make"></label>
+<label>Model<input data-path="vehicle.model"></label>
+<label>VIN<input data-path="vehicle.vin"></label>
+<label>Mileage<input data-path="vehicle.mileage"></label>
+<label>Plate<input data-path="vehicle.plate"></label>
+<label>State<input data-path="vehicle.state"></label>
+</div>
+</div>`;
+
+if(i===1)return `
+<div class="card">
+<h2>2. Vehicle Verification</h2>
+${photoBox('VIN on Dashboard','vin_dash')}
+${photoBox('VIN Manufacturer Placard','vin_placard')}
+${photoBox('Tire Placard','tire_placard')}
+${photoBox('Odometer / Mileage','odometer')}
+${photoBox('Dashboard — Ignition On','dash_ignition')}
+${photoBox('Dashboard — Engine Running','dash_running')}
+<label>Warning / Indicator Light Notes<textarea data-path="verification.warningNotes"></textarea></label>
+<label>Oil-Change Sticker<select data-path="verification.oilSticker">
+<option></option><option>Present</option><option>Present but incomplete / illegible</option><option>Not present</option><option>N/A</option>
+</select></label>
+${photoBox('Oil-Change Sticker Photo','oil_sticker')}
+</div>`;
+
+if(i===2)return `
+<div class="card">
+<h2>3. OBD-II Scan</h2>
+<label>Scan Performed<select data-path="obd.scan"><option>Yes</option><option>No</option><option>Unable</option></select></label>
+<label>DTC Codes<textarea data-path="obd.codes" placeholder="Example: P0300, P0420, U0100"></textarea></label>
+<label>Warning Lights<textarea data-path="obd.warning"></textarea></label>
+<label>Notes<textarea data-path="obd.notes"></textarea></label>
+<label>OBD-II PDF Evidence<input id="obdPdf" type="file" accept="application/pdf,.pdf"></label>
+<div id="pdfStatus" class="small">${state.obd.pdfName?'Attached: '+esc(state.obd.pdfName):'No PDF attached.'}</div>
+${photoBox('OBD-II Screen / Evidence','obd_evidence')}
+</div>`;
+
+if(i===3)return `
+<div class="card">
+<h2>4. Exterior Condition</h2>
+${photoBox('Left Front Quarter Panel','lf_quarter')}
+${photoBox('Left Front — Door Open / Driver Interior','lf_door')}
+${photoBox('Left Rear Exterior','lr_exterior')}
+${photoBox('Left Rear Interior','lr_interior')}
+${photoBox('Trunk / Cargo Area','trunk')}
+${photoBox('Rear / Plate / Hitch / Badging','rear')}
+${photoBox('Spare Tire / Jack / Tools','spare')}
+${photoBox('Right Front Exterior','rf_exterior')}
+${photoBox('Right Front Interior','rf_interior')}
+${photoBox('Right Rear Exterior','rr_exterior')}
+${photoBox('Right Rear Interior','rr_interior')}
+<label>Exterior Notes<textarea data-path="verification.exteriorNotes"></textarea></label>
+</div>`;
+
+if(i===4)return `
+<div class="card">
+<h2>5. Test Drive</h2>
+<div class="grid">
+<label>Starting Mileage<input data-path="test.startMileage"></label>
+<label>Ending Mileage<input data-path="test.endMileage"></label>
+<label>Approx. Distance<input data-path="test.distance"></label>
+<label>Road Conditions<input data-path="test.road"></label>
+</div>
+${['Highway','City / Stop-and-Go','Started Normally','Warning Lights Checked','Brake Pedal Feel','Parking Brake','Acceleration','Transmission Shifting','Engine Performance','Steering','Braking','Suspension','Alignment / Pull','Vibration','Noise','Cruise Control','A/C While Driving','4WD / AWD','Steering Wheel Centered','Steering Play','Wheel Returns to Center','Steering Noise'].map(x=>statusItem(x,'test.'+slug(x))).join('')}
+<label>If Test Drive Not Performed<select data-path="test.notPerformed">
+<option></option><option>Customer declined</option><option>Dealer declined</option><option>Vehicle not operational</option><option>Weather / road conditions</option><option>No permission</option><option>Other</option>
+</select></label>
+<label>Limitations<textarea data-path="test.limitations"></textarea></label>
+</div>`;
+
+if(i===5)return `
+<div class="card">
+<h2>6. A/C & HVAC</h2>
+<div class="grid">
+<label>Ambient Temp<input data-path="hvac.ambient"></label>
+<label>A/C Vent Temp<input data-path="hvac.acTemp"></label>
+<label>Heater Vent Temp<input data-path="hvac.heatTemp"></label>
+</div>
+${['Blower Speeds','Mode Controls','Defrost','A/C Compressor','Unusual Noise / Odor'].map(x=>statusItem(x,'hvac.'+slug(x))).join('')}
+</div>`;
+
+if(i===6)return `
+<div class="card">
+<h2>7. Battery Test</h2>
+<div class="grid">
+<label>Voltage<input data-path="battery.voltage"></label>
+<label>Rated CCA<input data-path="battery.ratedCCA"></label>
+<label>Measured CCA<input data-path="battery.measuredCCA"></label>
+<label>Result<select data-path="battery.result">
+<option></option><option>Good</option><option>Recharge / Retest</option><option>Replace</option><option>Unable to Test</option>
+</select></label>
+</div>
+${photoBox('Battery / Tester Evidence','battery_evidence')}
+<label>Notes<textarea data-path="battery.notes"></textarea></label>
+</div>`;
+
+if(i===7)return `
+<div class="card">
+<h2>8. Electrical</h2>
+${ELECTRICAL.map(x=>statusItem(x,'electrical.'+slug(x))).join('')}
+</div>`;
+
+if(i===8)return `
+<div class="card">
+<h2>9. Engine / Under-Hood</h2>
+${ENGINE.map(x=>statusItem(x,'engine.'+slug(x))).join('')}
+${photoBox('Overall Engine Photo','engine_overall')}
+</div>`;
+
+if(i>=9&&i<=12){
+const k=['LF','LR','RF','RR'][i-9];
+const n={LF:'Left Front',LR:'Left Rear',RF:'Right Front',RR:'Right Rear'}[k];
+return `
+<div class="card">
+<h2>${i+1}. ${n}</h2>
+<div class="grid">
+<label>Tread Depth<input data-path="corners.${k}.tread"></label>
+<label>PSI<input data-path="corners.${k}.psi"></label>
+<label>Tire Size<input data-path="corners.${k}.size"></label>
+<label>DOT / Date Code<input data-path="corners.${k}.dot"></label>
+<label>Uneven Wear<input data-path="corners.${k}.uneven"></label>
+<label>TPMS<select data-path="corners.${k}.tpms"><option></option><option>Normal</option><option>Warning</option><option>N/A</option></select></label>
+</div>
+${photoBox('Tire Photo','c_'+k+'_tire')}
+${CORNER.map(x=>statusItem(x,'corners.'+k+'.'+slug(x))).join('')}
+${photoBox('Corner Overall Photo','c_'+k+'_overall')}
+</div>`;
+}
+
+if(i===13)return `
+<div class="card">
+<h2>14. Transmission / Drivetrain</h2>
+${['Transmission Operation','Transmission Leaks','CV Axles / Boots','Driveshaft / U-Joints','Differential','4WD / AWD'].map(x=>statusItem(x,'drivetrain.'+slug(x))).join('')}
+</div>`;
+
+if(i===14)return `
+<div class="card">
+<h2>15. Undercarriage</h2>
+${['Frame / Unibody','Rust / Corrosion','Exhaust','Fuel System','Visible Leaks','Undercarriage Damage'].map(x=>statusItem(x,'undercarriage.'+slug(x))).join('')}
+${photoBox('Undercarriage Overall','undercarriage_overall')}
+</div>`;
+
+if(i===15){
+const f=findings();
+return `
+<div class="card">
+<h2>16. Findings Summary</h2>
+<h3>🔴 Failures (${f.fail.length})</h3>
+${f.fail.length?f.fail.map(x=>`<p><b>${esc(x.name)}</b> — ${esc(x.note)}</p>`).join(''):'<p>None recorded.</p>'}
+<h3>🟡 Attention (${f.attn.length})</h3>
+${f.attn.length?f.attn.map(x=>`<p><b>${esc(x.name)}</b> — ${esc(x.note)}</p>`).join(''):'<p>None recorded.</p>'}
+<h3>🟢 Pass (${f.pass.length})</h3>
+<p class="small">${f.pass.length} items marked Pass.</p>
+<label>Overall Observations<textarea data-path="generalNotes"></textarea></label>
+<label>Inspection Limitations<textarea data-path="limitations"></textarea></label>
+</div>`;
+}
+
+if(i===16)return `
+<div class="card">
+<h2>17. Photos & Evidence</h2>
+${photoBox('General Photo / Evidence','general_photo')}
+<label>Additional Evidence Notes<textarea data-path="evidenceNotes"></textarea></label>
+</div>`;
+
+return `
+<div class="card">
+<h2>18. Professional Report</h2>
+<p>Generate the complete professional inspection report from the information, findings, measurements, OBD-II data, battery results and photos entered during the inspection.</p>
+<button class="primary" onclick="generateReport()">📄 Generate Professional Report</button>
+</div>`;
+}
+
+function hydrate(){
+document.querySelectorAll('[data-path]').forEach(el=>{
+const v=getPath(state,el.dataset.path);
+if(v!==undefined&&v!==null)el.value=v;
+const handler=()=>{
+setPath(state,el.dataset.path,el.value);
+save();
+};
+el.oninput=handler;
+el.onchange=handler;
+});
+
+document.querySelectorAll('[data-grid]').forEach(g=>drawPhotos(g.dataset.grid,g));
+
+if(step===2)setupPDF();
+}
+
+function setStatus(path,status){
+let v=getPath(state,path);
+if(!v||typeof v!=='object')setPath(state,path,{status,note:''});
+else v.status=status;
+save();
+render();
+}
+
+function takePhoto(key){
+photoKey=key;
+const input=document.getElementById('camera');
+input.value='';
+input.click();
+}
+
+document.getElementById('camera').onchange=async e=>{
+for(const f of e.target.files)await addPhoto(photoKey,f);
+render();
+};
+
+async function addPhoto(key,file){
+if(!file.type.startsWith('image/'))return;
+const data=await imageData(file);
+if(!state.photos[key])state.photos[key]=[];
+state.photos[key].push({id:crypto.randomUUID(),name:file.name,data});
+save();
+}
+
+function imageData(file){
+return new Promise(resolve=>{
+const reader=new FileReader();
+reader.onload=()=>{
+const img=new Image();
+img.onload=()=>{
+const max=1600;
+const scale=Math.min(1,max/Math.max(img.width,img.height));
+const canvas=document.createElement('canvas');
+canvas.width=Math.round(img.width*scale);
+canvas.height=Math.round(img.height*scale);
+canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+resolve(canvas.toDataURL('image/jpeg',.8));
+};
+img.src=reader.result;
+};
+reader.readAsDataURL(file);
+});
+}
+
+function drawPhotos(key,grid){
+grid.innerHTML=(state.photos[key]||[]).map(p=>
+`<div class="photo"><img src="${p.data}" alt=""><button onclick="removePhoto('${key}','${p.id}')">×</button></div>`
+).join('');
+}
+
+function removePhoto(key,id){
+state.photos[key]=(state.photos[key]||[]).filter(x=>x.id!==id);
+save();
+render();
+}
+
+function setupPDF(){
+const el=document.getElementById('obdPdf');
+if(!el)return;
+el.onchange=()=>{
+const f=el.files[0];
+if(!f)return;
+state.obd.pdfName=f.name;
+document.getElementById('pdfStatus').textContent='Attached: '+f.name+'. Enter DTC codes manually from the scan if needed.';
+save();
+};
+}
+
+function findings(){
+const out={fail:[],attn:[],pass:[]};
+
+function walk(obj,path=''){
+if(!obj||typeof obj!=='object')return;
+
+if(obj.status){
+const name=path.split('.').pop().replace(/_/g,' ');
+const entry={name,note:obj.note||''};
+if(obj.status==='FAIL')out.fail.push(entry);
+if(obj.status==='ATTENTION')out.attn.push(entry);
+if(obj.status==='PASS')out.pass.push(entry);
+}
+
+Object.keys(obj).forEach(k=>{
+if(k!=='photos')walk(obj[k],path?path+'.'+k:k);
+});
+}
+
+walk(state);
+return out;
+}
+
+function resultRows(obj,prefix=''){
+let result=[];
+if(!obj||typeof obj!=='object')return result;
+
+Object.keys(obj).forEach(k=>{
+if(k==='photos')return;
+const v=obj[k];
+const name=(prefix?prefix+' — ':'')+k.replace(/_/g,' ');
+
+if(v&&typeof v==='object'&&v.status){
+const c=v.status==='PASS'?'rpass':v.status==='ATTENTION'?'rattn':v.status==='FAIL'?'rfail':'';
+result.push(`<tr class="${c}"><td>${esc(name)}</td><td><b>${esc(v.status)}</b></td><td>${esc(v.note||'')}</td></tr>`);
+}else if(v&&typeof v==='object'){
+result.push(...resultRows(v,name));
+}
+});
+return result;
+}
+
+function reportPhotos(){
+let html='';
+for(const [key,arr] of Object.entries(state.photos||{})){
+if(!arr.length)continue;
+html+=`<div class="report-page"><h3>${esc(key.replace(/_/g,' '))}</h3><div class="rphotos">`;
+arr.forEach(p=>html+=`<img src="${p.data}" alt="">`);
+html+='</div></div>';
+}
+return html||'<p>No photos added.</p>';
+}
+
+function generateReport(){
+state.completed=true;
+save();
+show('reportScreen');
+
+const f=findings();
+const v=state.vehicle||{};
+const c=state.customer||{};
+
+document.getElementById('report').innerHTML=`
+<h1>${esc(settingsData.name)}</h1>
+<h2>Professional Vehicle Inspection Report — V3 Final</h2>
+<p class="small">Generated ${new Date().toLocaleString()}</p>
+
+<table>
+<tr><th>Customer</th><td>${esc(c.name)}</td><th>Inspection</th><td>${esc(c.type)}</td></tr>
+<tr><th>Vehicle</th><td>${esc(v.year)} ${esc(v.make)} ${esc(v.model)}</td><th>Price</th><td>$${esc(state.price)}</td></tr>
+<tr><th>VIN</th><td>${esc(v.vin)}</td><th>Mileage</th><td>${esc(v.mileage)}</td></tr>
+<tr><th>Plate</th><td>${esc(v.plate)} ${esc(v.state)}</td><th>Inspector</th><td>${esc(c.inspector||settingsData.inspector)}</td></tr>
+</table>
+
+<h2>Major Findings</h2>
+<h3>🔴 Failures (${f.fail.length})</h3>
+${f.fail.length?f.fail.map(x=>`<p><b>${esc(x.name)}</b> — ${esc(x.note)}</p>`).join(''):'<p>None recorded.</p>'}
+
+<h3>🟡 Attention (${f.attn.length})</h3>
+${f.attn.length?f.attn.map(x=>`<p><b>${esc(x.name)}</b> — ${esc(x.note)}</p>`).join(''):'<p>None recorded.</p>'}
+
+<h2>OBD-II Scan</h2>
+<table>
+<tr><th>Scan Performed</th><td>${esc(state.obd.scan)}</td></tr>
+<tr><th>DTC Codes</th><td>${esc(state.obd.codes||'None entered')}</td></tr>
+<tr><th>Warning Lights</th><td>${esc(state.obd.warning||'')}</td></tr>
+<tr><th>Notes</th><td>${esc(state.obd.notes||'')}</td></tr>
+<tr><th>PDF Evidence</th><td>${esc(state.obd.pdfName||'Not attached')}</td></tr>
+</table>
+
+<h2>Battery Test</h2>
+<table>
+<tr><th>Voltage</th><td>${esc(state.battery.voltage||'')}</td></tr>
+<tr><th>Rated CCA</th><td>${esc(state.battery.ratedCCA||'')}</td></tr>
+<tr><th>Measured CCA</th><td>${esc(state.battery.measuredCCA||'')}</td></tr>
+<tr><th>Result</th><td>${esc(state.battery.result||'')}</td></tr>
+<tr><th>Notes</th><td>${esc(state.battery.notes||'')}</td></tr>
+</table>
+
+<h2>Inspection Results</h2>
+<table>
+<tr><th>Item</th><th>Status</th><th>Notes</th></tr>
+${resultRows(state.test,'Test Drive').join('')}
+${resultRows(state.hvac,'A/C & HVAC').join('')}
+${resultRows(state.electrical,'Electrical').join('')}
+${resultRows(state.engine,'Engine / Under-Hood').join('')}
+${resultRows(state.corners,'Tires / Corners').join('')}
+${resultRows(state.drivetrain,'Transmission / Drivetrain').join('')}
+${resultRows(state.undercarriage,'Undercarriage').join('')}
+</table>
+
+<h2>Test Drive Information</h2>
+<table>
+${Object.entries(state.test||{}).filter(([k])=>!k.includes('status')).map(([k,v])=>
+`<tr><th>${esc(k.replace(/_/g,' '))}</th><td>${esc(typeof v==='object'?(v.note||v.status||''):v)}</td></tr>`
+).join('')}
+</table>
+
+<h2>A/C & HVAC</h2>
+<table>
+${Object.entries(state.hvac||{}).map(([k,v])=>
+`<tr><th>${esc(k.replace(/_/g,' '))}</th><td>${esc(typeof v==='object'?(v.note||v.status||''):v)}</td></tr>`
+).join('')}
+</table>
+
+<h2>General Observations</h2>
+<p>${esc(state.generalNotes||'')}</p>
+
+<h2>Limitations</h2>
+<p>${esc(state.limitations||'')}</p>
+
+<h2>Photos & Evidence</h2>
+${reportPhotos()}
+
+<hr>
+<p>${esc(settingsData.disclaimer)}</p>
+
+<p style="margin-top:45px">Inspector Signature: __________________________________________</p>
+<p>Date: ____________________</p>
+`;
+}
+
+async function settings(){
+show('settings');
+await loadSettings();
+document.getElementById('sName').value=settingsData.name;
+document.getElementById('sInspector').value=settingsData.inspector;
+document.getElementById('sDisclaimer').value=settingsData.disclaimer;
+}
+
+async function saveSettings(){
+settingsData={
+id:'business',
+name:document.getElementById('sName').value||DEFAULT_SETTINGS.name,
+inspector:document.getElementById('sInspector').value||'',
+disclaimer:document.getElementById('sDisclaimer').value||DEFAULT_SETTINGS.disclaimer
+};
+await put(settingsData,'settings');
+toast('Settings saved');
+}
+
+function toast(text){
+let el=document.getElementById('toast');
+if(!el){
+el=document.createElement('div');
+el.id='toast';
+el.style='position:fixed;bottom:75px;left:50%;transform:translateX(-50%);background:#111827;color:white;padding:10px 14px;border-radius:9px;z-index:50';
+document.body.appendChild(el);
+}
+el.textContent=text;
+el.hidden=false;
+setTimeout(()=>el.hidden=true,1300);
+}
+
+function next(){
+if(step<STEPS.length-1){
+save();
+step++;
+render();
+window.scrollTo(0,0);
+}else{
+generateReport();
+}
+}
+
+function back(){
+if(step>0){
+save();
+step--;
+render();
+window.scrollTo(0,0);
+}else{
+home();
+}
+}
+
+function esc(s){
+return String(s??'').replace(/[&<>"']/g,m=>({
+'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[m]));
+}
+
+openDB();
+</script>
+</body>
+</html>
